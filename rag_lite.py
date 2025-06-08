@@ -335,7 +335,7 @@ def enrich_payload_with_rag(payload_json_path, max_context_tokens=200000):
             context_text = context_text[:max_context_chars] + "\n\n[Context truncated due to token limit]"
             print(f"⚠️ Context truncated to fit {max_context_tokens} token limit")
         
-        rag_addition = f"\n\n{context_text}\n\nBased on the above context, please provide your analysis and recommendations.\n"
+        rag_addition = context_text
         
         # Add to the last user message (assuming that's your main prompt)
         for message in reversed(payload['messages']):
