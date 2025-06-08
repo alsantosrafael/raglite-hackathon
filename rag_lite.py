@@ -67,22 +67,22 @@ def extract_sql_keywords(sql_query, method_name=None):
         return keywords
     
     # Table names (improved pattern)
-    tables = re.findall(r'(?:FROM|JOIN|UPDATE|INTO|TABLE)\\s+([a-zA-Z0-9_]+)', sql_query, re.IGNORECASE)
+    tables = re.findall(r'(?:FROM|JOIN|UPDATE|INTO|TABLE)\s+([a-zA-Z0-9_]+)', sql_query, re.IGNORECASE)
     keywords.update(tables)
     
     # Column names (improved - remove SQL keywords first)
-    sql_clean = re.sub(r'\\b(SELECT|FROM|WHERE|JOIN|ON|AND|OR|ORDER|BY|GROUP|HAVING|LIMIT|DISTINCT|COUNT|SUM|AVG|MAX|MIN)\\b', '', sql_query, flags=re.IGNORECASE)
-    columns = re.findall(r'\\b([a-zA-Z][a-zA-Z0-9_]*)', sql_clean)
+    sql_clean = re.sub(r'\b(SELECT|FROM|WHERE|JOIN|ON|AND|OR|ORDER|BY|GROUP|HAVING|LIMIT|DISTINCT|COUNT|SUM|AVG|MAX|MIN)\b', '', sql_query, flags=re.IGNORECASE)
+    columns = re.findall(r'\b([a-zA-Z][a-zA-Z0-9_]*)', sql_clean)
     keywords.update([col.lower() for col in columns if len(col) > 2])
     
     # SQL operation keywords
-    sql_operations = re.findall(r'\\b(CREATE|ALTER|DROP|INDEX|CONSTRAINT|PRIMARY|FOREIGN|KEY|BATCH|CACHE|FETCH|LAZY|EAGER)\\b', sql_query, re.IGNORECASE)
+    sql_operations = re.findall(r'\b(CREATE|ALTER|DROP|INDEX|CONSTRAINT|PRIMARY|FOREIGN|KEY|BATCH|CACHE|FETCH|LAZY|EAGER)\b', sql_query, re.IGNORECASE)
     keywords.update([k.lower() for k in sql_operations])
     
     # JPA method keywords (improved camelCase splitting)
     if method_name:
         # Split camelCase and PascalCase
-        method_parts = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\\b)', method_name)
+        method_parts = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\b)', method_name)
         keywords.update([part.lower() for part in method_parts if len(part) > 2])
         
         # Also extract whole method name
@@ -100,7 +100,7 @@ def extract_java_keywords(content):
     content_str = str(content)
     
     # Class names (improved pattern)
-    class_names = re.findall(r'(?:class|interface|enum)\\s+([A-Za-z][A-Za-z0-9_]*)', content_str, re.IGNORECASE)
+    class_names = re.findall(r'(?:class|interface|enum)\s+([A-Za-z][A-Za-z0-9_]*)', content_str, re.IGNORECASE)
     keywords.update([name.lower() for name in class_names])
     
     # Annotations (JPA, Spring, etc.)
@@ -108,17 +108,17 @@ def extract_java_keywords(content):
     keywords.update([ann.lower() for ann in annotations])
     
     # Method names (camelCase splitting)
-    methods = re.findall(r'(?:public|private|protected)?\\s*\\w+\\s+([a-z][A-Za-z0-9_]*)\\s*\\(', content_str)
+    methods = re.findall(r'(?:public|private|protected)?\s*\w+\s+([a-z][A-Za-z0-9_]*)\s*\(', content_str)
     for method in methods:
-        method_parts = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\\b)', method)
+        method_parts = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\b)', method)
         keywords.update([part.lower() for part in method_parts if len(part) > 2])
     
     # Field/variable names
-    fields = re.findall(r'(?:private|public|protected)\\s+\\w+\\s+([a-zA-Z][a-zA-Z0-9_]*)', content_str)
+    fields = re.findall(r'(?:private|public|protected)\s+\w+\s+([a-zA-Z][a-zA-Z0-9_]*)', content_str)
     keywords.update([field.lower() for field in fields])
     
     # Package names
-    packages = re.findall(r'package\\s+([a-zA-Z][a-zA-Z0-9_.]*)', content_str)
+    packages = re.findall(r'package\s+([a-zA-Z][a-zA-Z0-9_.]*)', content_str)
     for package in packages:
         package_parts = package.split('.')
         keywords.update([part.lower() for part in package_parts if len(part) > 2])
@@ -136,14 +136,14 @@ def extract_content_keywords(content):
     keywords.update(extract_java_keywords(content))
     
     # Database and JPA related terms
-    db_terms = re.findall(r'\\b(entity|repository|service|controller|table|column|join|select|where|index|optimization|performance|query|sql|database|hibernate|jpa|spring|batch|cache|fetch|lazy|eager)\\b', content, re.IGNORECASE)
+    db_terms = re.findall(r'\b(entity|repository|service|controller|table|column|join|select|where|index|optimization|performance|query|sql|database|hibernate|jpa|spring|batch|cache|fetch|lazy|eager)\b', content, re.IGNORECASE)
     keywords.update([term.lower() for term in db_terms])
     
     # Technical terms (camelCase aware)
-    tech_terms = re.findall(r'\\b([A-Z][a-z]+(?:[A-Z][a-z]+)*|[a-z]+(?:[A-Z][a-z]+)+)\\b', content)
+    tech_terms = re.findall(r'\b([A-Z][a-z]+(?:[A-Z][a-z]+)*|[a-z]+(?:[A-Z][a-z]+)+)\b', content)
     for term in tech_terms:
         # Split camelCase
-        parts = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\\b)', term)
+        parts = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\b)', term)
         keywords.update([part.lower() for part in parts if len(part) > 2])
     
     return keywords
@@ -185,7 +185,7 @@ def search_payload_context(keywords, payload_json_path, max_snippets=3):
             repo_content = str(repo)
             relevance_score = calculate_relevance_score(repo_content, keywords)
             if relevance_score > 0:
-                snippet = f"Repository: {repo.get('name', 'Unknown')}\\n{repo_content[:400]}..."
+                snippet = f"Repository: {repo.get('name', 'Unknown')}\n{repo_content[:400]}..."
                 relevant_snippets.append((snippet, relevance_score))
     
     # Search in entity classes
@@ -194,7 +194,7 @@ def search_payload_context(keywords, payload_json_path, max_snippets=3):
             entity_content = str(entity)
             relevance_score = calculate_relevance_score(entity_content, keywords)
             if relevance_score > 0:
-                snippet = f"Entity: {entity.get('name', 'Unknown')}\\n{entity_content[:400]}..."
+                snippet = f"Entity: {entity.get('name', 'Unknown')}\n{entity_content[:400]}..."
                 relevant_snippets.append((snippet, relevance_score))
     
     # Search in queries
@@ -203,7 +203,7 @@ def search_payload_context(keywords, payload_json_path, max_snippets=3):
             query_content = f"SQL: {query.get('sql', '')} Method: {query.get('method_name', '')}"
             relevance_score = calculate_relevance_score(query_content, keywords)
             if relevance_score > 0:
-                snippet = f"Query: {query.get('method_name', 'Unknown')}\\n{query_content}"
+                snippet = f"Query: {query.get('method_name', 'Unknown')}\n{query_content}"
                 relevant_snippets.append((snippet, relevance_score))
     
     # Sort snippets by relevance score (highest first)
@@ -219,7 +219,7 @@ def chunk_knowledge_base(content, chunk_size=300, overlap=50):
         return []
     
     # Split by paragraphs first
-    paragraphs = re.split(r'\\n\\s*\\n', content)
+    paragraphs = re.split(r'\n\s*\n', content)
     chunks = []
     
     for para in paragraphs:
@@ -297,7 +297,7 @@ def format_context_for_injection(relevant_context, kb_snippets):
             context_parts.append(snippet)
             context_parts.append("")
     
-    return "\\n".join(context_parts)
+    return "\n".join(context_parts)
 
 def enrich_payload_with_rag(payload_json_path, max_context_tokens=30000):
     """Enhanced main function to enrich the payload with RAG context"""
@@ -332,10 +332,10 @@ def enrich_payload_with_rag(payload_json_path, max_context_tokens=30000):
         # Truncate context text to fit within token limit (rough estimation: 4 chars per token)
         max_context_chars = max_context_tokens * 4
         if len(context_text) > max_context_chars:
-            context_text = context_text[:max_context_chars] + "\\n\\n[Context truncated due to token limit]"
+            context_text = context_text[:max_context_chars] + "\n\n[Context truncated due to token limit]"
             print(f"⚠️ Context truncated to fit {max_context_tokens} token limit")
         
-        rag_addition = f"\\n\\n{context_text}\\n\\nBased on the above context, please provide your analysis and recommendations.\\n"
+        rag_addition = f"\n\n{context_text}\n\nBased on the above context, please provide your analysis and recommendations.\n"
         
         # Add to the last user message (assuming that's your main prompt)
         for message in reversed(payload['messages']):
@@ -352,5 +352,3 @@ def enrich_payload_with_rag(payload_json_path, max_context_tokens=30000):
     
     print("🎉 RAG enrichment completed!")
     return payload
-
-
