@@ -1,6 +1,5 @@
 import json
 import re
-import os
 
 def extract_keywords_from_payload(payload_json_path):
     """Extract keywords from the existing payload.json"""
