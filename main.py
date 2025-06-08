@@ -8,7 +8,7 @@ from rag_lite import enrich_payload_with_rag
 app = FastAPI()
 
 @app.post("/optimize_sql")
-async def optimize_sql(payload: Dict[str, Any], max_context_tokens: int = 30000):
+async def optimize_sql(payload: Dict[str, Any], max_context_tokens: int = 200000):
     try:
         print("Received payload:", payload)
         

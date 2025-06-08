@@ -299,7 +299,7 @@ def format_context_for_injection(relevant_context, kb_snippets):
     
     return "\n".join(context_parts)
 
-def enrich_payload_with_rag(payload_json_path, max_context_tokens=30000):
+def enrich_payload_with_rag(payload_json_path, max_context_tokens=200000):
     """Enhanced main function to enrich the payload with RAG context"""
     print("🚀 Starting RAG enrichment...")
     
